@@ -1,4 +1,4 @@
-import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import { CacheModule, MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UserModule } from './modules/user/user.module';
@@ -15,6 +15,7 @@ import path, { join } from 'path';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import databaseConfig from './config/database.config';
 import { LoggerMiddleware } from './common/middleware/middleware';
+import { AuthModule } from './modules/auth/auth.module';
 
 
 
@@ -38,6 +39,8 @@ import { LoggerMiddleware } from './common/middleware/middleware';
       isGlobal: true,
       load: [databaseConfig],
     }),
+    AuthModule,
+    CacheModule.register({ isGlobal: true }),
   ],
   controllers: [AppController],
   providers: [AppService],
@@ -50,4 +53,4 @@ export class AppModule implements NestModule {
       .exclude()
       .forRoutes();
   }
- }
+}
