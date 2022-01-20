@@ -7,6 +7,7 @@ import { MemberInSpaceEntity } from './member-in-space.entity';
 @Module({
   imports: [TypeOrmModule.forFeature([MemberInSpaceEntity])],
   controllers: [MemberInSpaceController],
-  providers: [MemberInSpaceService]
+  providers: [MemberInSpaceService],
+  exports: [MemberInSpaceService]
 })
 export class MemberInSpaceModule {}
