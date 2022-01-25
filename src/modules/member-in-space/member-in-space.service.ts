@@ -14,7 +14,7 @@ export class MemberInSpaceService {
             const result = await this.memberInSpaceRepo.createQueryBuilder().select().where('spaceId = :spaceId', {spaceId: spaceId}).getCount();
             return result
         } catch (error) {
-            throw new InternalServerErrorException('Database connection error');
+            throw new InternalServerErrorException(`Database connection error: ${error}`);
         }
     }
 }

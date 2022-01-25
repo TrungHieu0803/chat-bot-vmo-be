@@ -45,12 +45,12 @@ import { AuthModule } from './modules/auth/auth.module';
   controllers: [AppController],
   providers: [AppService],
   exports: []
-})
+}) 
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer
       .apply(LoggerMiddleware)
       .exclude()
-      .forRoutes();
+      .forRoutes('user');
   }
 }

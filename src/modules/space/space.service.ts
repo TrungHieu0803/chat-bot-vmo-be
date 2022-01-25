@@ -1,4 +1,4 @@
-import { forwardRef, Inject, Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { paginateResponse } from 'src/common/paginate/paginate';
 import { Repository } from 'typeorm';
@@ -7,12 +7,13 @@ import { SpaceEntity } from './space.entity';
 
 @Injectable()
 export class SpaceService {
+
     constructor(
         @InjectRepository(SpaceEntity) private spaceRepo: Repository<SpaceEntity>,
         @Inject(forwardRef(() => MemberInSpaceService)) private memberInSpaceService: MemberInSpaceService,
-    ){}
+    ) { }
 
-    async getListSpace(take: number, page: number): Promise<any>{
+    async getListSpace(take: number, page: number): Promise<any> {
         const takeQuery = take || 10;
         const pageQuery = page || 1;
         const skipQuery = (pageQuery - 1) * take;
@@ -20,13 +21,33 @@ export class SpaceService {
             const spaces = await this.spaceRepo.createQueryBuilder().orderBy('name', 'ASC').skip(skipQuery).take(takeQuery).getMany();
             const totalSpace = await this.spaceRepo.createQueryBuilder().select().getCount();
             const result = [];
-            for(let space of spaces){
+            for (let space of spaces) {
                 const totalMember = await this.memberInSpaceService.totalMember(space.id);
-                result.push({...space, totalMember});
+                result.push({ ...space, totalMember });
             }
             return paginateResponse(result, pageQuery, takeQuery, totalSpace);
         } catch (error) {
-            
+            throw new InternalServerErrorException(`Database connection error: ${error}`);
+        }
+    }
+
+    async searchByName(take: number, page: number, name: string): Promise<any> {
+        const takeQuery = take || 10;
+        const pageQuery = page || 1;
+        const skipQuery = (pageQuery - 1) * take;
+        try {
+            const spaces = await this.spaceRepo.createQueryBuilder()
+                .where(`MATCH(name) AGAINST ('${name}' IN BOOLEAN MODE)`).orderBy('name', 'ASC').skip(skipQuery).take(takeQuery).getMany();
+            const totalSpace = await this.spaceRepo.createQueryBuilder()
+                .where(`MATCH(name) AGAINST ('${name}' IN BOOLEAN MODE)`).getCount();
+            const result = [];
+            for (let space of spaces) {
+                const totalMember = await this.memberInSpaceService.totalMember(space.id);
+                result.push({ ...space, totalMember });
+            }
+            return paginateResponse(result, pageQuery, takeQuery, totalSpace);
+        } catch (error) {
+            throw new InternalServerErrorException(`Database connection error: ${error}`);
         }
     }
 }
