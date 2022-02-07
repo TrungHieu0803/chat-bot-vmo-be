@@ -6,6 +6,12 @@ export class UserEntity {
     @PrimaryGeneratedColumn('increment')
     id: number;
 
+    @Column({ name: 'google_user_id', type: 'varchar' })
+    googleUserId: string;
+
+    @Column({type: 'varchar'})
+    avatarUrl: string;
+
     @Column({ type: 'nvarchar', nullable: false })
     name: string;
 
@@ -13,6 +19,6 @@ export class UserEntity {
     email: string
 
     @Column({ type: 'varchar', nullable: false })
-    password: string  
+    password: string
 
 }

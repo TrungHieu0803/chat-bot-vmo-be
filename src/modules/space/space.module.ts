@@ -8,6 +8,7 @@ import { MemberInSpaceModule } from '../member-in-space/member-in-space.module';
 @Module({
   imports:[TypeOrmModule.forFeature([SpaceEntity, ]), forwardRef(() => MemberInSpaceModule)],
   controllers: [SpaceController],
-  providers: [SpaceService]
+  providers: [SpaceService],
+  exports: [SpaceService]
 })
 export class SpaceModule {}

@@ -8,8 +8,14 @@ export class SpaceEntity {
     @PrimaryGeneratedColumn('increment')
     id: number;
 
-    @Column({ type: 'nvarchar' })
+    @Column({ type: 'varchar', nullable: false })
     name: string;
+
+    @Column({ name: 'display_name', type: 'nvarchar' })
+    displayName: string;
+
+    @Column({ type: 'boolean', nullable: false })
+    isEnable: boolean;
 
     @OneToMany(type => NotificationEntity, notification => notification.space)
     notification: NotificationEntity[];

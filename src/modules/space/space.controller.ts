@@ -1,16 +1,17 @@
 import { Controller, DefaultValuePipe, Get, ParseIntPipe, Query } from '@nestjs/common';
-import { ApiBearerAuth, ApiInternalServerErrorResponse, ApiNotFoundResponse, ApiUnauthorizedResponse } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiForbiddenResponse, ApiInternalServerErrorResponse, ApiNotFoundResponse, ApiUnauthorizedResponse } from '@nestjs/swagger';
 import { SpaceService } from './space.service';
 
+@ApiBearerAuth('access-token')
+@ApiUnauthorizedResponse({ schema: { example: { statusCode: 401, message: 'Access token is invalid', error: 'Unauthorized' } } })
+@ApiForbiddenResponse({schema: {example:{statusCode: 403, message: 'Access token expired', error: 'Forbidden'}}})
+@ApiNotFoundResponse({ schema: { example: { statusCode: 404, message: 'Token not found', error: 'Not found' } } })
+@ApiInternalServerErrorResponse({ schema: { example: { statusCode: 500, message: 'Database connection error', error: 'Internal server error' } } })
 @Controller('space')
 export class SpaceController {
   constructor(private readonly spaceService: SpaceService) { }
 
   @Get()
-  @ApiBearerAuth('access-token')
-  @ApiUnauthorizedResponse({ schema: { example: { statusCode: 401, message: 'Token is invalid', error: 'Unauthorized' } } })
-  @ApiNotFoundResponse({ schema: { example: { statusCode: 404, message: 'Token not found', error: 'Not found' } } })
-  @ApiInternalServerErrorResponse({ schema: { example: { statusCode: 500, message: 'Database connection error', error: 'Internal server error' } } })
   async getListSpace(@Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number = 1,
     @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number = 10) {
     limit = limit > 20 ? 20 : limit;
@@ -18,12 +19,8 @@ export class SpaceController {
   }
 
   @Get('/search')
-  @ApiBearerAuth('access-token')
-  @ApiUnauthorizedResponse({ schema: { example: { statusCode: 401, message: 'Token is invalid', error: 'Unauthorized' } } })
-  @ApiNotFoundResponse({ schema: { example: { statusCode: 404, message: 'Token not found', error: 'Not found' } } })
-  @ApiInternalServerErrorResponse({ schema: { example: { statusCode: 500, message: 'Database connection error', error: 'Internal server error' } } })
   async searchByName(@Query('name') name: string, @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number = 1,
     @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number = 10) {
-    return await this.spaceService.searchByName(limit, page, name);
+    return await this.spaceService.searchByDisplayName(limit, page, name);
   }
 }

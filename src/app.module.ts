@@ -51,6 +51,6 @@ export class AppModule implements NestModule {
     consumer
       .apply(LoggerMiddleware)
       .exclude()
-      .forRoutes('user');
+      .forRoutes('user', 'member');
   }
 }

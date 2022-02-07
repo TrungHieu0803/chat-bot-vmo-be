@@ -18,8 +18,7 @@ export class SpaceService {
         const pageQuery = page || 1;
         const skipQuery = (pageQuery - 1) * take;
         try {
-            const spaces = await this.spaceRepo.createQueryBuilder().orderBy('name', 'ASC').skip(skipQuery).take(takeQuery).getMany();
-            const totalSpace = await this.spaceRepo.createQueryBuilder().select().getCount();
+            const [spaces, totalSpace] = await this.spaceRepo.createQueryBuilder().orderBy('name', 'ASC').skip(skipQuery).take(takeQuery).getManyAndCount();
             const result = [];
             for (let space of spaces) {
                 const totalMember = await this.memberInSpaceService.totalMember(space.id);
@@ -31,21 +30,50 @@ export class SpaceService {
         }
     }
 
-    async searchByName(take: number, page: number, name: string): Promise<any> {
+    async searchByDisplayName(take: number, page: number, name: string): Promise<any> {
         const takeQuery = take || 10;
         const pageQuery = page || 1;
         const skipQuery = (pageQuery - 1) * take;
         try {
-            const spaces = await this.spaceRepo.createQueryBuilder()
-                .where(`MATCH(name) AGAINST ('${name}' IN BOOLEAN MODE)`).orderBy('name', 'ASC').skip(skipQuery).take(takeQuery).getMany();
-            const totalSpace = await this.spaceRepo.createQueryBuilder()
-                .where(`MATCH(name) AGAINST ('${name}' IN BOOLEAN MODE)`).getCount();
+            const [spaces, totalSpace] = await this.spaceRepo.createQueryBuilder()
+                .where("name like :name", { name: `%${name}%` }).orderBy('name', 'ASC').skip(skipQuery).take(takeQuery).getManyAndCount();
             const result = [];
             for (let space of spaces) {
                 const totalMember = await this.memberInSpaceService.totalMember(space.id);
                 result.push({ ...space, totalMember });
             }
             return paginateResponse(result, pageQuery, takeQuery, totalSpace);
+        } catch (error) {
+            throw new InternalServerErrorException(`Database connection error: ${error}`);
+        }
+    }
+
+    async addSpace(name: string, displayName: string): Promise<SpaceEntity> {
+        const spaceEntity = new SpaceEntity();
+        spaceEntity.name = name;
+        spaceEntity.displayName = displayName;
+        spaceEntity.isEnable = true;
+        try {
+            const result = await this.spaceRepo.save(spaceEntity);
+            return result;
+        } catch (error) {
+            throw new InternalServerErrorException(`Database connection error: ${error}`);
+        }
+    }
+
+    async findByName(name: string): Promise<SpaceEntity> {
+        try {
+            const result = await this.spaceRepo.findOne({ name: name });
+            return result;
+        } catch (error) {
+            throw new InternalServerErrorException(`Database connection error: ${error}`);
+        }
+    }
+
+    async updateSpaceStatus(space: SpaceEntity, isEnable: boolean): Promise<SpaceEntity> {
+        try {
+            const result = await this.spaceRepo.save({ ...space, isEnable: isEnable });
+            return result;
         } catch (error) {
             throw new InternalServerErrorException(`Database connection error: ${error}`);
         }

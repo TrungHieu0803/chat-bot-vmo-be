@@ -8,6 +8,7 @@ export class AppController {
 
   @Post('bot')
   handleEvents(@Request() req){
+    console.log(req.body);
     return this.appService.handleEvents(req.body);
   }
 }

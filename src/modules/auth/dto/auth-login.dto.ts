@@ -11,5 +11,14 @@ export class AuthLoginDto{
 
     @ApiProperty({type: String})
     @IsNotEmpty()
-    password: string;
+    name: string;
+
+    @ApiProperty({type: String})
+    @IsNotEmpty()
+    googleId?: string;
+
+    @ApiProperty({type: String})
+    @IsNotEmpty()
+    imageUrl: string;
+
 }

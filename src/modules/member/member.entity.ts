@@ -8,13 +8,22 @@ import { TaggedMemberEntity } from "../tagged-member/tagged-member.entity";
 export class MemberEntity {
 
     @PrimaryGeneratedColumn('increment')
-    id: number
+    id: number;
 
-    @Column({ type: 'nvarchar' })
-    name: string
+    @Column({name: 'google_id', type: 'varchar', nullable: true})
+    googleId: string;
 
-    @Column({ type: 'varchar' })
-    mail: string
+    @Column({name: 'image_url', type: 'varchar', nullable: true})
+    imageUrl: string;
+
+    @Column({ type: 'nvarchar', nullable: true })
+    name: string;
+
+    @Column({name: 'display_name', type: 'nvarchar', nullable: false})
+    displayName: string;
+
+    @Column({ type: 'varchar', nullable: true })
+    email: string;
 
     @OneToMany(type => MemberInSpaceEntity, memberInSpace => memberInSpace.member)
     memberInSpace: MemberInSpaceEntity[];
