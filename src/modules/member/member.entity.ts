@@ -1,5 +1,6 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { MemberInSpaceEntity } from "../member-in-space/member-in-space.entity";
+import { NotificationEntity } from "../notification/notification.entity";
 import { ReceivedMessageEntity } from "../received-message/received-message.entity";
 import { SendToEntity } from "../send-to/send-to.entity";
 import { TaggedMemberEntity } from "../tagged-member/tagged-member.entity";
@@ -10,16 +11,16 @@ export class MemberEntity {
     @PrimaryGeneratedColumn('increment')
     id: number;
 
-    @Column({name: 'google_id', type: 'varchar', nullable: true})
+    @Column({ name: 'google_id', type: 'varchar', nullable: true })
     googleId: string;
 
-    @Column({name: 'image_url', type: 'varchar', nullable: true})
+    @Column({ name: 'image_url', type: 'varchar', nullable: true })
     imageUrl: string;
 
     @Column({ type: 'nvarchar', nullable: true })
     name: string;
 
-    @Column({name: 'display_name', type: 'nvarchar', nullable: false})
+    @Column({ name: 'display_name', type: 'nvarchar', nullable: false })
     displayName: string;
 
     @Column({ type: 'varchar', nullable: true })
@@ -36,4 +37,7 @@ export class MemberEntity {
 
     @OneToMany(type => TaggedMemberEntity, taggedMember => taggedMember.member)
     taggedMember: TaggedMemberEntity[];
+
+    @OneToMany(type => NotificationEntity, notification => notification.member)
+    notification: NotificationEntity[];
 }

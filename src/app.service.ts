@@ -24,8 +24,8 @@ export class AppService {
     if (body['type'] === 'ADDED_TO_SPACE') {
       return await this.handEventAddToSpace(body);
     } else if (body['type'] === 'MESSAGE') {
-      console.log(await getMembersInSpace('spaces/AAAAPBhiEBE'))
-      // return await this.handleEventReceivedMessage(body);
+      
+       return await this.handleEventReceivedMessage(body);
     } else if (body['type'] === 'REMOVED_FROM_SPACE') {
       await this.handleEventRemoveFromSpace(body);
     }
@@ -75,6 +75,8 @@ export class AppService {
           return { text: `${data.user.displayName} yêu cầu tham gia thành công` };
         }
       }
+    }else if (message == 'thread'){
+      return { text: `ThreadID của thread này là: ${data.message.thread.name}` };
     }
   }
 

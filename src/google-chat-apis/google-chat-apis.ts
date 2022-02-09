@@ -2,6 +2,8 @@ import { config } from 'dotenv';
 import { google } from 'googleapis'
 import axios from 'axios'
 import { InternalServerErrorException } from '@nestjs/common';
+import { NotificationEntity } from 'src/modules/notification/notification.entity';
+import { MemberEntity } from 'src/modules/member/member.entity';
 
 config();
 
@@ -50,10 +52,24 @@ export const getMembersInSpace = async (spaceName: string) => {
     }
 }
 
-export const createMessage = async (message: string, spaceName: string) => {
+export const createMessage = async (message: string, members: MemberEntity[], spaceName: string, threadId: string) => {
+    let tagMember = '';
+    if (members.length != 0) {
+        for (let member of members) {
+            tagMember += `<${member.name}> `
+        }
+    }else{
+        tagMember = '<users/all> '
+    }
+    const data = {
+        text: tagMember + message,
+        thread: {
+            name: threadId
+         }
+    }
     try {
         const accessToken = await getJWT();
-        const res = await axios.post(`https://chat.googleapis.com/v1/${spaceName}/messages`, { 'text': message }, {
+        const res = await axios.post(`https://chat.googleapis.com/v1/${spaceName}/messages`, data, {
             headers: {
                 "Authorization": `Bearer ${accessToken}`
             }

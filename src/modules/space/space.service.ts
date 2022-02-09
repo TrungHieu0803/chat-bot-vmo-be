@@ -70,6 +70,15 @@ export class SpaceService {
         }
     }
 
+    async findById(id: number): Promise<SpaceEntity>{
+        try {
+            const result = await this.spaceRepo.findOne({ id: id });
+            return result;
+        } catch (error) {
+            throw new InternalServerErrorException(`Database connection error: ${error}`);
+        }
+    }
+
     async updateSpaceStatus(space: SpaceEntity, isEnable: boolean): Promise<SpaceEntity> {
         try {
             const result = await this.spaceRepo.save({ ...space, isEnable: isEnable });

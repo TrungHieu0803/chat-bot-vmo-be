@@ -20,7 +20,6 @@ export class AuthService {
 
   async login(authLogin: AuthLoginDto): Promise<any> {
     const member = await this.memberService.memberLogin(authLogin);
-    console.log(member);
     const accessToken = this.generateToken(member.id, member.email, process.env.ACCESS_TOKEN_SECRET, process.env.ACCESS_TOKEN_EXPIRATION);
     const refreshToken = this.generateToken(member.id, member.email, process.env.REFRESH_TOKEN_SECRET, process.env.REFRESH_TOKEN_EXPIRATION);
     await this.cacheManager.set(member.id.toString(), refreshToken, { ttl: 1000 });
