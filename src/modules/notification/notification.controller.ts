@@ -1,8 +1,10 @@
-import { Body, Controller, Post, Request } from '@nestjs/common';
-import { ApiBearerAuth, ApiUnauthorizedResponse, ApiForbiddenResponse, ApiNotFoundResponse, ApiInternalServerErrorResponse } from '@nestjs/swagger';
+import { Body, Controller, Get, Param, Post, Request } from '@nestjs/common';
+import { ApiBearerAuth, ApiUnauthorizedResponse, ApiForbiddenResponse, ApiNotFoundResponse, ApiInternalServerErrorResponse, ApiTags } from '@nestjs/swagger';
+import { ListNotificationDto } from './dto/list-notification.dto';
 import { NormalNotificationDto } from './dto/normal-notification.dto';
 import { NotificationService } from './notification.service';
 
+@ApiTags('notification')
 @ApiBearerAuth('access-token')
 @ApiUnauthorizedResponse({ schema: { example: { statusCode: 401, message: 'Access token is invalid', error: 'Unauthorized' } } })
 @ApiForbiddenResponse({schema: {example:{statusCode: 403, message: 'Access token expired', error: 'Forbidden'}}})
@@ -14,10 +16,13 @@ export class NotificationController {
 
   @Post('/create-normal-notification')
   async createNotification(@Body() notification: NormalNotificationDto, @Request() req): Promise<any>{
-    console.log(notification);
     return await this.notificationService.createNotification(notification, req.headers.email);
   }
 
+  @Get(':spaceId')
+  async getListNotification(@Param('spaceId') spaceId: number): Promise<ListNotificationDto>{
+    return await this.notificationService.getListNotification(spaceId);
+  }
   
   
 }

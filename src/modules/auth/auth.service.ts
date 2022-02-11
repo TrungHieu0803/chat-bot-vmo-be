@@ -1,7 +1,5 @@
 import { forwardRef, Inject, Injectable, UnauthorizedException, CACHE_MANAGER } from '@nestjs/common';
-import { UserService } from '../user/user.service';
 import { AuthLoginDto } from './dto/auth-login.dto';
-import * as bcrypt from 'bcrypt';
 import { config } from 'dotenv';
 import { JwtService, JwtSignOptions } from '@nestjs/jwt';
 import { Cache } from 'cache-manager';

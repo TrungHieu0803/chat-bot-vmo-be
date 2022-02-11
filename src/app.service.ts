@@ -8,7 +8,7 @@ import { getMembersInSpace, getSpaces } from 'src/google-chat-apis/google-chat-a
 import { MemberInSpaceEntity } from './modules/member-in-space/member-in-space.entity';
 import { MemberInSpaceService } from './modules/member-in-space/member-in-space.service';
 import { SpaceEntity } from './modules/space/space.entity';
-
+import { MemberRole } from 'src/common/member-role/member-role';
 
 config()
 @Injectable()
@@ -42,9 +42,9 @@ export class AppService {
       //   const member = await this.memberService.findByEmail(data.user.email);
       for (let member of listMember) {
         if (data.user.name == member.member.name) {
-          await this.addMemberToSpace(space, data.user.displayName, data.user.name, 'owner');
+          await this.addMemberToSpace(space, data.user.displayName, data.user.name, MemberRole.OWNER);
         }else{
-          await this.addMemberToSpace(space, member.member.displayName, member.member.name, 'member');
+          await this.addMemberToSpace(space, member.member.displayName, member.member.name, MemberRole.MEMBER);
         }
       }
       // if (member == null) {
@@ -65,10 +65,10 @@ export class AppService {
     if (message == 'join') {
       if (member == null) {
         const newMember = await this.memberService.addMember(data.user.email, data.user.displayName, data.user.avatarUrl, null, data.user.name);
-        await this.memberInSpaceService.addMemberToSpace(space, newMember, 'member');
+        await this.memberInSpaceService.addMemberToSpace(space, newMember, MemberRole.MEMBER);
       } else {
         await this.memberService.updateMemberName(member, data.user.name);
-        const result = await this.memberInSpaceService.addMemberToSpace(space, member, 'member');
+        const result = await this.memberInSpaceService.addMemberToSpace(space, member, MemberRole.MEMBER);
         if (result == null) {
           return { text: `${data.user.displayName} bạn đã tham gia trước đó` };
         } else {

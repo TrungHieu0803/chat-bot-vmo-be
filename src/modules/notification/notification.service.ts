@@ -1,4 +1,4 @@
-import { forwardRef, Inject, Injectable, InternalServerErrorException } from '@nestjs/common';
+import { forwardRef, Inject, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import e from 'express';
 import { Repository } from 'typeorm';
@@ -11,10 +11,10 @@ import { SchedulerRegistry } from '@nestjs/schedule';
 import { CronJob } from 'cron';
 import { MemberEntity } from '../member/member.entity';
 import { createMessage } from 'src/google-chat-apis/google-chat-apis';
+import { ListNotificationDto } from './dto/list-notification.dto';
 
 @Injectable()
 export class NotificationService {
-
 
   constructor(
     @InjectRepository(NotificationEntity) private notificationRepo: Repository<NotificationEntity>,
@@ -30,7 +30,6 @@ export class NotificationService {
     const createdBy = await this.memberService.findByEmail(email);
     let dayOfWeek = '';
     if (notification.dayOfWeek.length == 0) {
-      console.log(notification.year)
       const d = new Date();
       const currentYear = d.getFullYear();
       const currentMonth = d.getMonth();
@@ -51,6 +50,7 @@ export class NotificationService {
     notificationEntity.threadId = notification.threadId;
     notificationEntity.space = space;
     notificationEntity.member = createdBy;
+    notificationEntity.createdAt = new Date();
     try {
       const result = await this.notificationRepo.save(notificationEntity);
       const isTagAll = notification.tags.find((tag) => tag == 'Tất cả');
@@ -71,9 +71,37 @@ export class NotificationService {
     }
   }
 
+  async updateNotificationStatus(notification: NotificationEntity, isEnable: boolean): Promise<NotificationEntity> {
+    const result = await this.notificationRepo.save({ ...notification, isEnable: isEnable });
+    return result;
+  }
+
+  async getListNotification(spaceId: number): Promise<ListNotificationDto> {
+    const space = await this.spaceService.findById(spaceId);
+    if (space == null) {
+      throw new NotFoundException(`Space have id-${spaceId} does not exist`);
+    }
+    try {
+      const notifications = await this.notificationRepo.createQueryBuilder()
+        .select(['id', 'name', 'is_enable AS isEnable'])
+        .where('spaceId = :spaceId', { spaceId: spaceId }).execute();
+      const result = new ListNotificationDto();
+      result.spaceId = spaceId;
+      result.notifications = notifications;
+      return result;
+    } catch (error) {
+      throw new InternalServerErrorException(`Database connection error: ${error}`);
+    }
+  }
+
   addCronJobForNormalNotification(spaceName: string, notification: NotificationEntity, members: MemberEntity[]) {
-    const job = new CronJob(`0 ${notification.sendAtMinute} ${notification.sendAtHour} ${notification.sendAtDayOfMonth} ${notification.sendAtMonths} ${notification.sendAtDayOfWeek}`, () => {
-        createMessage(notification.content, members, spaceName ,notification.threadId);
+    const job = new CronJob(`0 ${notification.sendAtMinute} ${notification.sendAtHour} ${notification.sendAtDayOfMonth} ${notification.sendAtMonths} ${notification.sendAtDayOfWeek}`, async () => {
+      const result = await createMessage(notification.content, members, spaceName, notification.threadId);
+      if (result == 0) {
+        await this.updateNotificationStatus(notification, false);
+        this.schedulerRegistry.deleteCronJob(notification.id.toString());
+        job.stop();
+      }
     });
     this.schedulerRegistry.addCronJob(notification.id.toString(), job);
     job.start();

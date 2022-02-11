@@ -19,7 +19,7 @@ export class NotificationEntity {
     @Column({ name: 'thread_id', type: 'varchar', nullable: true })
     threadId: string;
 
-    @Column({ name: 'isEnable', type: 'boolean', nullable: false })
+    @Column({ name: 'is_enable', type: 'boolean', nullable: false })
     isEnable: boolean;
 
     @Column({ name: 'send_at_minute', type: 'varchar', nullable: false })
@@ -36,6 +36,9 @@ export class NotificationEntity {
 
     @Column({ name: 'send_at_day_of_month', type: 'varchar', nullable: true })
     sendAtDayOfMonth: string;
+
+    @Column({ name: 'created_at', type: 'datetime', nullable: false })
+    createdAt: Date; 
 
     @ManyToOne(type => SpaceEntity, space => space.notification)
     space: SpaceEntity;

@@ -2,7 +2,6 @@ import { config } from 'dotenv';
 import { google } from 'googleapis'
 import axios from 'axios'
 import { InternalServerErrorException } from '@nestjs/common';
-import { NotificationEntity } from 'src/modules/notification/notification.entity';
 import { MemberEntity } from 'src/modules/member/member.entity';
 
 config();
@@ -18,7 +17,7 @@ const getJWT = async () => {
         const token = await jwtClient.authorize();
         return token.access_token;
     } catch (error) {
-        throw new InternalServerErrorException(error);
+        return 0;
     }
 }
 
@@ -33,7 +32,7 @@ export const getSpaces = async () => {
             });
         return res.data;
     } catch (error) {
-        throw new InternalServerErrorException(`Can not fetch api from google: ${error}`);
+        return 0;
     }
 }
 
@@ -48,7 +47,7 @@ export const getMembersInSpace = async (spaceName: string) => {
             });
         return res.data.memberships;
     } catch (error) {
-        throw new InternalServerErrorException(`Can not fetch api from google: ${error}`);
+       return 0;
     }
 }
 
@@ -76,7 +75,7 @@ export const createMessage = async (message: string, members: MemberEntity[], sp
         })
         return res.data;
     } catch (error) {
-        throw new InternalServerErrorException(`Can not fetch api from google: ${error}`);
+        return 0;
     }
 }
 
