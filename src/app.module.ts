@@ -1,4 +1,4 @@
-import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import { CacheModule, MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UserModule } from './modules/user/user.module';
@@ -15,7 +15,8 @@ import path, { join } from 'path';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import databaseConfig from './config/database.config';
 import { LoggerMiddleware } from './common/middleware/middleware';
-
+import { AuthModule } from './modules/auth/auth.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 
 @Module({
@@ -38,16 +39,19 @@ import { LoggerMiddleware } from './common/middleware/middleware';
       isGlobal: true,
       load: [databaseConfig],
     }),
+    AuthModule,
+    CacheModule.register({ isGlobal: true }),
+    ScheduleModule.forRoot()
   ],
   controllers: [AppController],
   providers: [AppService],
   exports: []
-})
+}) 
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer
       .apply(LoggerMiddleware)
       .exclude()
-      .forRoutes();
+      .forRoutes('user', 'member','notification');
   }
- }
+}
