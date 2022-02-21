@@ -93,7 +93,6 @@ export class NotificationService {
       throw new InternalServerErrorException(`Database connection error: ${error}`);
     }
   }
-
   addCronJobForNormalNotification(spaceName: string, notification: NotificationEntity, members: MemberEntity[]) {
     const job = new CronJob(`0 ${notification.sendAtMinute} ${notification.sendAtHour} ${notification.sendAtDayOfMonth} ${notification.sendAtMonths} ${notification.sendAtDayOfWeek}`, async () => {
       const result = await createMessage(notification.content, members, spaceName, notification.threadId);
